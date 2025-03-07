@@ -23,11 +23,11 @@ x = x.astype(np.complex128)
 my_dft_result = my_dft(x)
 FFTW_result = np.fft.fft(x,norm='ortho')
 
-print("\nOriginal data",x)
-print("My DFT result",my_dft_result)
-print("\nNumpy FFTW result",FFTW_result)
+print("\nTesting data",x)
+print("\nMy DFT result",my_dft_result)
+print("\nNumpy FFT result",FFTW_result)
 
-print("\nMy DFT result - Numpy FFTW result",my_dft_result-FFTW_result)
+print("\nMy DFT result - Numpy FFT result",my_dft_result-FFTW_result)
 
 
 
