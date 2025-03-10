@@ -79,12 +79,12 @@ def plot_convergence(center, width, resolution, bias=1e-5):
     # 绘制收敛图
     plt.figure(figsize=(8, 6))
     plt.imshow(region, extent=(X.min(), X.max(), Y.min(), Y.max()), origin='lower', cmap='Paired')
-    plt.plot(x1,y1,color = 'black')
-    plt.plot(x0,y0,color = 'black')
-    plt.plot(x2,y22,color = 'black')
-    plt.plot(x2,y2,color = 'black')
-    plt.plot(x0,-y0,color = 'black')
-    plt.plot(x1,-y1,color = 'black')
+    # plt.plot(x1,y1,color = 'black')
+    # plt.plot(x0,y0,color = 'black')
+    # plt.plot(x2,y22,color = 'black')
+    # plt.plot(x2,y2,color = 'black')
+    # plt.plot(x0,-y0,color = 'black')
+    # plt.plot(x1,-y1,color = 'black')
     plt.colorbar(label='Root index (0: 1, 1: $e^{i\\frac{2\\pi}{3}}$, 2: $e^{i\\frac{4\\pi}{3}}$)')
     center_str = f"({center.real:.2f}{center.imag:+.2f}j)"
     

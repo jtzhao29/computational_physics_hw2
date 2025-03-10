@@ -142,7 +142,325 @@ $$z_{n+1} = z_n - \frac{z_n^3 - 1}{3z_n^2} = \frac{2z_n^3 +1}{3z_n^2}$$
 #### （b）以 $(-0.56,0.18)$ 为中心， 0.1 为半宽，分辨率 0.0002。
 ![](figure/B_4_2.png)
 
+#### 发现：
 由以上三张可视化结果可以发现：
 1. 三个单位根周边的初始点会收敛到该单位根上，但是辐角为$\frac{\pi}{3}$的根会收敛到$e^{\frac{4\pi}{3}}$上，辐角为$\pi$的根会收敛到$1$上,辐角为$\frac{5\pi}{3}$的根会收敛到$e^{\frac{2\pi}{3}}$上，即辐角为$\frac{\pi}{3}$,$\pi$,$\frac{5\pi}{3}$的初始点倾向于收敛到“对角”的解上。
 2. 随着图像的放大，图像呈现出“分形”的特点，也就是存在“自相似”性。
 3. 放大后分形的角度是会转动的，角度是否转动取决于中心所在分形的指向，比如 $(-0.8,0.0)$ 为中心图所在分形指向是水平的，所以放大后分形角度没有转到；而$(-0.56,0.18)$ 为中心的图在辐角为$\frac{\pi}{3}$的根处，所以放大后分形角度会转动。
+4. 在加入辅助线后可以看出，颜色由$y = tan(30\degree)x$,$x = 0$,$y = -tan(30\degree)x$，$y = tan(30\degree)x$,$x = 0$,$y = -tan(30\degree)x$ 六条线分割
+![](figure/B_4_3.png)
+5. 由下图可以看出，在分形结点处，辐角为$\frac{\pi}{6}$,$\frac{\pi}{2}$,$\frac{5\pi}{6}$,$\frac{7\pi}{6}$,${\frac{2\pi}{3}}$,$\frac{11\pi}{6}$的初始点不收敛
+![](figure/B_4_4.png)
+
+# 附录
+## A_dft.py
+````python
+import numpy as np
+import pandas as pd
+
+
+def my_dft_norm(x_array)->np.ndarray:
+    """
+    自己编写一个DFT程序，要求接受元素类型为
+    complex128(python)/ComplexF64(julia) 
+    的⼀维数组，返回其离散傅⾥叶变换
+    """
+    N = len(x_array)
+    n = np.arange(N)
+    k = n.reshape((N,1))
+    M = np.exp(-2j * np.pi * k * n / N)/N**0.5  #np.exp(np.array) 会对数组中的每个元素应用指数函数 exp
+    return np.dot(M,x_array)
+
+def my_dft(x_array)->np.ndarray:
+    """
+    自己编写一个DFT程序，要求接受元素类型为
+    complex128(python)/ComplexF64(julia) 
+    的⼀维数组，返回其离散傅⾥叶变换
+    """
+    N = len(x_array)
+    n = np.arange(N)
+    k = n.reshape((N,1))
+    M = np.exp(-2j * np.pi * k * n / N) #np.exp(np.array) 会对数组中的每个元素应用指数函数 exp
+    return np.dot(M,x_array)
+
+
+if __name__ == '__main__':
+    # 测试样例:随机数组
+    np.random.seed(0)  # 设置seed可以保证输出结果相同
+    x = np.random.rand(8) + 1j * np.random.rand(8)
+    x = x.astype(np.complex128)
+    # Dataframe.astype(dtype, copy:defalt True, errors='raise')Cast a pandas object to a specified dtype dtype.
+
+    my_dft_result = my_dft(x)
+    FFTW_result = np.fft.fft(x,norm='ortho')
+
+    print("\nTesting data",x)
+    print("\nMy DFT result",my_dft_result)
+    print("\nNumpy FFT result",FFTW_result)
+
+    print("\nMy DFT result - Numpy FFT result",my_dft_result-FFTW_result)
+````
+
+## A_Base2_FFT.py 
+
+```` python
+import numpy as np
+from A_dft import my_dft
+import cmath
+from timeit import timeit
+import matplotlib.pyplot as plt
+def is_power_of_two(n)->bool:
+    """
+    判断一个数是否是2的幂
+    """
+    return n > 0 and (n & (n - 1)) == 0
+    #如果是2的幂次，则则其二进制表示中只有一个比特位为 1
+
+def fft(x):
+    """
+    快速傅里叶变换,自己写的，递归算法
+    """
+    n = len(x)
+    if n==1:
+        return x
+    
+    even = fft(x[0::2])
+    odd = fft(x[1::2])
+    T = [cmath.exp(-2j * cmath.pi * k / n) * odd[k] for k in range(n // 2)]
+    # 利用离散傅里叶变换的性质:傅里叶变换的结果中前一半和后一半互为共轭
+    return [even[k] + T[k] for k in range(n // 2)] + \
+           [even[k] - T[k] for k in range(n // 2)]
+
+def iterative_fft(x):
+    """
+    快速傅里叶变换,自己写的，非递归算法，蝴蝶运算的那个
+    """
+    n = len(x)
+    log_n = int(np.log2(n))
+
+    W = [cmath.exp(-2j * cmath.pi / (1 << i)) for i in range(log_n + 1)]
+
+    result = np.array(x)
+    indices = np.arange(n)
+    indices = np.bitwise_or.reduce([((indices >> i) & 1) << (log_n-1-i) for i in range(log_n)], axis=0)
+    result = result[indices]
+
+    half_size = 1
+    for level in range(log_n):
+        step = half_size * 2
+        for start in range(0, n, step):
+            factor = 1
+            for i in range(half_size):
+                even = result[start + i]
+                odd = factor * result[start + half_size + i]
+                result[start + i] = even + odd
+                result[start + half_size + i] = even - odd
+                factor *= W[level + 1]
+        half_size = step
+
+    return result
+
+
+if __name__ == '__main__':
+    # # 测试样例:随机数组
+    # np.random.seed(0)  # 设置seed可以保证输出结果相同
+    # x = np.random.rand(8) + 1j * np.random.rand(8)
+    # x = x.astype(np.complex128)
+   
+    # my_fft_y = fft(x)
+    # my_dft_y = my_dft(x)
+    # FFT_y = np.fft.fft(x)
+    # print("\nTesting data",x)
+    # print("\nMy FFT result",my_fft_y)
+    # # print("\nMy DFT result",my_dft_y)
+    # print("\nFFTW result",FFT_y)
+
+    # 给出数组⼤⼩从2**4到2**12的测试样例
+    size = [2**i for i in range(4,13)]
+    my_fft = []
+    my_iterative_fft = []
+    np_fft = []
+    for i in size:
+        if  is_power_of_two(i):
+            x = np.random.rand(i) + 1j * np.random.rand(i)
+            x = x.astype(np.complex128)
+            exec_time_my_fft = timeit(lambda: fft(x),number=1000)
+            exec_time_fft = timeit(lambda: np.fft.fft(x),number=1000)
+            exec_time_iterative_fft = timeit(lambda: iterative_fft(x),number=1000)
+            my_fft.append(exec_time_my_fft/1000)
+            my_iterative_fft.append(exec_time_iterative_fft/1000)
+            np_fft.append(exec_time_fft/1000)
+            
+            print(f"my fft for size{i},exection time:{exec_time_my_fft}")
+            # print(f"my iterative_fft for size{i},exection time:{exec_time_iterative_fft}")
+            print(f"np.fft for size{i},exection time:{exec_time_fft}")
+
+    nlogn = [i*np.log2(i) for i in size]
+
+    plt.plot(size,my_fft,label="my_fft")
+    plt.plot(size,my_iterative_fft,label="my_iterative_fft")
+    plt.plot(size,np_fft,label="np_fft")
+    plt.plot(size,nlogn,label="nlogn")
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.legend()
+    plt.xlabel('size',fontsize=25)
+    plt.ylabel('time',fontsize=25)
+    plt.title('FFT execution time',fontsize=25)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.show()
+````
+## A_wave.py 
+````python
+import numpy as np
+import matplotlib.pyplot as plt
+
+data = np.loadtxt("./data/waveform.dat")
+time = data[:,0]
+voltage = data[:,1]
+
+sampling_rate = 1 / (time[1] - time[0])
+n = len(voltage)
+freq = np.fft.fftfreq(n, d=1/sampling_rate)
+fft_values = np.fft.fft(voltage)
+
+plt.figure(figsize=(12, 6))
+
+
+plt.plot(freq[:n//2], np.abs(fft_values)[:n//2])
+plt.title('Frequency Domain Analysis using FFT',fontsize=25)
+plt.xlabel('Frequency (Hz)',fontsize=25)
+plt.ylabel('Amplitude',fontsize = 25)
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
+plt.grid()
+plt.show()
+
+print("the first 4 frequencies:")
+print(freq[:4])
+
+def find_the_largest4(Amplitude:np.ndarray)->np.ndarray:
+    """\n"""
+    Amplitude = np.abs(Amplitude)
+    Amplitude = Amplitude[:n//2]
+    Amplitude = Amplitude[np.argsort(Amplitude)[::-1]]
+    return Amplitude[:4]
+
+print("\namplitude of the largest 4 frequencies:")
+print(find_the_largest4(fft_values))
+
+plt.plot(time[:5000], voltage[:5000])
+plt.title('Wave',fontsize=25)
+plt.xlabel('Time (s)',fontsize=25)
+plt.ylabel('Voltage (V)',fontsize = 25)
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
+plt.grid()
+plt.show()
+````
+## B.py 
+````python
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(z):
+    """
+    方程 f(z) = z^3 - 1
+    """
+    return z**3 - 1
+
+def f_prime(z):
+    """
+    方程 f'(z) = 3z^2
+    """
+    return 3 * z**2
+
+def newton_method(z0, max_iter=100, tol=1e-6):
+    """
+    牛顿迭代法
+    z0: 初始猜测值
+    max_iter: 最大迭代次数
+    tol: 收敛容忍度
+    """
+    z = z0
+    for _ in range(max_iter):
+        dz = f(z) / f_prime(z)
+        z = z - dz
+        if abs(dz) < tol:
+            break
+    return z
+
+def get_convergence_region(center, width, resolution, bias=1e-5):
+    """
+    获取在复平面上牛顿法的收敛区域
+    center: 中心点 (复数)
+    width: 半宽度，表示正方形区域的范围
+    resolution: 网格的分辨率
+    bias: 收敛的容忍度
+    """
+    x_min, x_max = center.real - width, center.real + width
+    y_min, y_max = center.imag - width, center.imag + width
+    x_vals = np.linspace(x_min, x_max, resolution)
+    y_vals = np.linspace(y_min, y_max, resolution)
+    
+    # 创建网格
+    X, Y = np.meshgrid(x_vals, y_vals)
+    Z = X + 1j * Y
+    
+    # 根的集合
+    roots = [1, np.exp(2j * np.pi / 3), np.exp(4j * np.pi / 3)]  # 3个根
+    
+    # 收敛区域
+    region = np.zeros(Z.shape, dtype=int)
+    
+    # 对每个点应用牛顿法
+    for i in range(Z.shape[0]):
+        for j in range(Z.shape[1]):
+            z = Z[i, j]
+            # 对每个初始点进行牛顿迭代
+            z_final = newton_method(z, max_iter=50, tol=bias)
+            # 找到收敛的根
+            distances = [abs(z_final - root) for root in roots]
+            region[i, j] = np.argmin(distances)  # 收敛到哪个根
+    
+    return region, X, Y
+
+def plot_convergence(center, width, resolution, bias=1e-5):
+    """
+    可视化牛顿法收敛区域
+    """
+    region, X, Y = get_convergence_region(center, width, resolution, bias)
+    x1 = np.linspace(center,center+width,1000)
+    y1 = x1*(3**0.5)/3
+    x0 = np.linspace(center,center,1000)
+    x2 = np.linspace(center-width,center,1000)
+    y0 = np.linspace(center,center+width,1000)
+    y2 = x2*(3**0.5)/3
+    y22 = -x2*(3**0.5)/3
+
+    # 绘制收敛图
+    plt.figure(figsize=(8, 6))
+    plt.imshow(region, extent=(X.min(), X.max(), Y.min(), Y.max()), origin='lower', cmap='Paired')
+    plt.plot(x1,y1,color = 'black')
+    plt.plot(x0,y0,color = 'black')
+    plt.plot(x2,y22,color = 'black')
+    plt.plot(x2,y2,color = 'black')
+    plt.plot(x0,-y0,color = 'black')
+    plt.plot(x1,-y1,color = 'black')
+    plt.colorbar(label='Root index (0: 1, 1: $e^{i\\frac{2\\pi}{3}}$, 2: $e^{i\\frac{4\\pi}{3}}$)')
+    center_str = f"({center.real:.2f}{center.imag:+.2f}j)"
+    
+    plt.title(f"Newton's Method Convergence (Center: {center_str}, Width: {width}, res: {resolution})", fontsize=20)
+      
+    plt.xlabel('Re(z)',fontsize=20)
+    plt.ylabel('Im(z)',fontsize=20)
+    plt.show()
+
+
+# 测试可视化
+plot_convergence(center=0.0+0.0j, width=0.8, resolution=500, bias=1e-5)
+
+# plot_convergence(center=-0.8+0j,width=0.25,resolution=1000)
+# plot_convergence(center=-0.56+0.18j,width=0.1,resolution=1000)
+````
