@@ -22,4 +22,24 @@ plt.yticks(fontsize=20)
 plt.grid()
 plt.show()
 
-print(freq[:50])
+print("the first 4 frequencies:")
+print(freq[:4])
+
+def find_the_largest4(Amplitude:np.ndarray)->np.ndarray:
+    """\n"""
+    Amplitude = np.abs(Amplitude)
+    Amplitude = Amplitude[:n//2]
+    Amplitude = Amplitude[np.argsort(Amplitude)[::-1]]
+    return Amplitude[:4]
+
+print("\namplitude of the largest 4 frequencies:")
+print(find_the_largest4(fft_values))
+
+plt.plot(time[:5000], voltage[:5000])
+plt.title('Wave',fontsize=25)
+plt.xlabel('Time (s)',fontsize=25)
+plt.ylabel('Voltage (V)',fontsize = 25)
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
+plt.grid()
+plt.show()

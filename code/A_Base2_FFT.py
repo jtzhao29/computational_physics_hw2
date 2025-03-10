@@ -32,16 +32,13 @@ def iterative_fft(x):
     n = len(x)
     log_n = int(np.log2(n))
 
-    # 预计算旋转因子
     W = [cmath.exp(-2j * cmath.pi / (1 << i)) for i in range(log_n + 1)]
 
-    # Bit reversal permutation
     result = np.array(x)
     indices = np.arange(n)
     indices = np.bitwise_or.reduce([((indices >> i) & 1) << (log_n-1-i) for i in range(log_n)], axis=0)
     result = result[indices]
 
-    # Cooley-Tukey FFT using in-place iteration and butterfly operations
     half_size = 1
     for level in range(log_n):
         step = half_size * 2
