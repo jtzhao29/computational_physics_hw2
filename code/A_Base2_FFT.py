@@ -77,6 +77,6 @@ if __name__ == '__main__':
 
             
             print(f"my fft for size{i},exection time:{exec_time_my_fft}")
-            print(f"my iterative_fft for size{i},exection time:{exec_time_iterative_fft}")
+            # print(f"my iterative_fft for size{i},exection time:{exec_time_iterative_fft}")
             print(f"np.fft for size{i},exection time:{exec_time_fft}")
 
