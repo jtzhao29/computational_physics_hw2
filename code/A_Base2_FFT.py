@@ -2,6 +2,7 @@ import numpy as np
 from A_dft import my_dft
 import cmath
 from timeit import timeit
+import matplotlib.pyplot as plt
 def is_power_of_two(n)->bool:
     """
     判断一个数是否是2的幂
@@ -67,6 +68,9 @@ if __name__ == '__main__':
 
     # 给出数组⼤⼩从2**4到2**12的测试样例
     size = [2**i for i in range(4,13)]
+    my_fft = []
+    my_iterative_fft = []
+    np_fft = []
     for i in size:
         if  is_power_of_two(i):
             x = np.random.rand(i) + 1j * np.random.rand(i)
@@ -74,9 +78,26 @@ if __name__ == '__main__':
             exec_time_my_fft = timeit(lambda: fft(x), number=1000)
             exec_time_fft = timeit(lambda: np.fft.fft(x), number=1000)
             exec_time_iterative_fft = timeit(lambda: iterative_fft(x), number=1000)
-
+            my_fft.append(exec_time_my_fft)
+            my_iterative_fft.append(exec_time_iterative_fft)
+            np_fft.append(exec_time_fft)
             
             print(f"my fft for size{i},exection time:{exec_time_my_fft}")
-            # print(f"my iterative_fft for size{i},exection time:{exec_time_iterative_fft}")
+            print(f"my iterative_fft for size{i},exection time:{exec_time_iterative_fft}")
             print(f"np.fft for size{i},exection time:{exec_time_fft}")
 
+    nlogn = [i*np.log2(i) for i in size]
+
+    plt.plot(size,my_fft,label="my_fft")
+    plt.plot(size,my_iterative_fft,label="my_iterative_fft")
+    plt.plot(size,np_fft,label="np_fft")
+    plt.plot(size,nlogn,label="nlogn")
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.legend()
+    plt.xlabel('size',fontsize=25)
+    plt.ylabel('time',fontsize=25)
+    plt.title('FFT execution time',fontsize=25)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.show()
