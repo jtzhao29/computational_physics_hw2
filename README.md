@@ -158,8 +158,8 @@ $$z_{n+1} = z_n - \frac{z_n^3 - 1}{3z_n^2} = \frac{2z_n^3 +1}{3z_n^2}$$
 3. 放大后分形的角度是会转动的，角度是否转动取决于中心所在分形的指向，比如 $(-0.8,0.0)$ 为中心图所在分形指向是水平的，所以放大后分形角度没有转到；而$(-0.56,0.18)$ 为中心的图在辐角为$\frac{\pi}{3}$的根处，所以放大后分形角度会转动。
 4. 在加入辅助线后可以看出，颜色由$y = tan(30\degree)x$,$x = 0$,$y = -tan(30\degree)x$，$y = tan(30\degree)x$,$x = 0$,$y = -tan(30\degree)x$ 六条线分割
 ![](figure/B_4_3.png)
-5. 由下图可以看出，在分形结点处，辐角为$\frac{\pi}{6}$,$\frac{\pi}{2}$,$\frac{5\pi}{6}$,$\frac{7\pi}{6}$,${\frac{2\pi}{3}}$,$\frac{11\pi}{6}$的初始点不收敛
-![](figure/B_4_4.png)
+<!-- 5. 由下图可以看出，在分形结点处，辐角为$\frac{\pi}{6}$,$\frac{\pi}{2}$,$\frac{5\pi}{6}$,$\frac{7\pi}{6}$,${\frac{2\pi}{3}}$,$\frac{11\pi}{6}$的初始点不收敛
+![](figure/B_4_4.png) -->
 
 # 附录
 代码可见：https://github.com/jtzhao29/computational_physics_hw2.git
