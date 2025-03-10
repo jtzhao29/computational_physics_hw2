@@ -21,3 +21,5 @@ plt.xticks(fontsize=20)
 plt.yticks(fontsize=20)
 plt.grid()
 plt.show()
+
+print(freq[:50])
