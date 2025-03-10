@@ -162,6 +162,7 @@ $$z_{n+1} = z_n - \frac{z_n^3 - 1}{3z_n^2} = \frac{2z_n^3 +1}{3z_n^2}$$
 ![](figure/B_4_4.png)
 
 # 附录
+代码可见：https://github.com/jtzhao29/computational_physics_hw2.git
 ## A_dft.py
 ````python
 import numpy as np
