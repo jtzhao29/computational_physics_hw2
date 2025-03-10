@@ -160,7 +160,7 @@ $$z_{n+1} = z_n - \frac{z_n^3 - 1}{3z_n^2} = \frac{2z_n^3 +1}{3z_n^2}$$
 ![](figure/B_4_3.png)
 <!-- 5. 由下图可以看出，在分形结点处，辐角为$\frac{\pi}{6}$,$\frac{\pi}{2}$,$\frac{5\pi}{6}$,$\frac{7\pi}{6}$,${\frac{2\pi}{3}}$,$\frac{11\pi}{6}$的初始点不收敛
 ![](figure/B_4_4.png) -->
-
+<!-- 
 # 附录
 代码可见：https://github.com/jtzhao29/computational_physics_hw2.git
 ## A_dft.py
@@ -473,4 +473,4 @@ plot_convergence(center=0.0+0.0j, width=0.8, resolution=500, bias=1e-5)
 
 # plot_convergence(center=-0.8+0j,width=0.25,resolution=1000)
 # plot_convergence(center=-0.56+0.18j,width=0.1,resolution=1000)
-````
+```` -->
